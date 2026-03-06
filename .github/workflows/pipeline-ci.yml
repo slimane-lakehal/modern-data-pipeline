@@ -1,0 +1,53 @@
+name: Pipeline CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  # Daily run at 8am UTC
+  schedule:
+    - cron: '0 8 * * *'
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install -r requirements.txt
+          .venv/bin/dbt deps \
+            --project-dir transform/dbt_pipeline \
+            --profiles-dir transform/dbt_pipeline
+
+      - name: Extract + Load
+        run: .venv/bin/python scripts/run_extract.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOPICS: "data-engineering,dbt,python,analytics"
+          REPOS_PER_TOPIC: "30"
+          DUCKDB_PATH: "./pipeline.duckdb"
+
+      - name: dbt build
+        run: |
+          .venv/bin/dbt build \
+            --project-dir transform/dbt_pipeline \
+            --profiles-dir transform/dbt_pipeline
+        env:
+          DUCKDB_PATH: "./pipeline.duckdb"
+
+      - name: Upload DuckDB as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-duckdb
+          path: pipeline.duckdb
+          retention-days: 3
