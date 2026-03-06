@@ -1,0 +1,27 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# DuckDB
+*.duckdb
+*.duckdb.wal
+
+# dbt
+transform/dbt_pipeline/target/
+transform/dbt_pipeline/dbt_packages/
+transform/dbt_pipeline/logs/
+
+# Evidence.dev
+dashboard/node_modules/
+dashboard/.evidence/
+dashboard/build/
+
+# Env
+.env
+
+# OS
+.DS_Store
+Thumbs.db
