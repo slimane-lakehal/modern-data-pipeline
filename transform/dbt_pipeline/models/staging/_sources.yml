@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: "Raw GitHub API data loaded by the Prefect pipeline."
+    tables:
+      - name: repos
+        description: "One row per repo per daily snapshot. Append-only."
+        columns:
+          - name: repo_id
+            tests: [not_null]
+          - name: full_name
+            tests: [not_null]
+          - name: stars
+            tests: [not_null]
+          - name: snapshot_at
+            tests: [not_null]
+
+      - name: repo_languages
+        description: "Language breakdown per repo per snapshot."
+        columns:
+          - name: repo_id
+            tests: [not_null]
+          - name: language
+            tests: [not_null]
+          - name: pct
+            tests: [not_null]
