@@ -1,0 +1,18 @@
+{
+  "name": "github-trends-dashboard",
+  "version": "1.0.0",
+  "description": "GitHub Trending Repos Analytics — powered by Evidence.dev + DuckDB",
+  "scripts": {
+    "dev": "evidence dev",
+    "build": "evidence build",
+    "preview": "evidence preview"
+  },
+  "dependencies": {
+    "@evidence-dev/evidence": "^35.0.0",
+    "@evidence-dev/duckdb": "^1.0.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32"
+  }
+}
