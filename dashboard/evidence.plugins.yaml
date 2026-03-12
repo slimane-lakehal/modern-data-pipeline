@@ -1,5 +1,0 @@
-sources:
-  github_pipeline:
-    type: duckdb
-    # Path relative to dashboard/ directory
-    filename: ../pipeline.duckdb

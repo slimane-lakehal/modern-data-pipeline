@@ -17,7 +17,11 @@ transform/dbt_pipeline/logs/
 # Evidence.dev
 dashboard/node_modules/
 dashboard/.evidence/
+dashboard/.svelte-kit/
 dashboard/build/
+dashboard/static/data/
+dashboard/**/*.options.yaml
+dashboard/.vscode/settings.json
 
 # Env
 .env

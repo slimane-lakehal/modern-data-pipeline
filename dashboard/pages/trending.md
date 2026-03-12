@@ -2,7 +2,7 @@
 title: Trending Repos
 ---
 
-# Trending Repositories 🚀
+# Trending Repositories
 
 ```sql all_repos
 select
@@ -22,7 +22,7 @@ select
     repo_age_days,
     html_url,
     description
-from marts.mart_trending_repos
+from mart_trending_repos
 order by stars desc
 ```
 
@@ -30,28 +30,30 @@ order by stars desc
 
 ```sql topics
 select distinct source_topic as topic
-from marts.mart_trending_repos
+from mart_trending_repos
 order by topic
 ```
 
 <Dropdown
+  name="selected_topic"
   data={topics}
   value="topic"
-  name="selected_topic"
   title="Filter by topic"
   defaultValue="data-engineering"
 />
 
+
 ```sql filtered_repos
 select *
-from marts.mart_trending_repos
-where source_topic = '${inputs.selected_topic}'
+from mart_trending_repos
+where source_topic = '${inputs.selected_topic.value}'
 order by stars desc
 limit 50
 ```
 
 <DataTable data={filtered_repos} link="html_url" rows=15>
   <Column id="repo_name" title="Repository" />
+  <Column id="source_topic" title="Topic" />
   <Column id="owner_login" title="Owner" />
   <Column id="primary_language" title="Language" />
   <Column id="stars" title="⭐ Stars" fmt="num0" />
@@ -73,7 +75,7 @@ select
     fork_to_star_ratio,
     primary_language,
     popularity_tier
-from marts.mart_trending_repos
+from mart_trending_repos
 where stars > 500
 ```
 

@@ -2,7 +2,7 @@
 title: Language Trends
 ---
 
-# Language Trends 🐍
+# Language Trends
 
 _Which programming languages dominate the data-engineering open source ecosystem?_
 
@@ -16,7 +16,7 @@ select
     avg_stars_per_repo,
     top_repos_count,
     rank_by_repos
-from marts.mart_language_trends
+from mart_language_trends
 where rank_by_repos <= 20
 order by repo_count desc
 ```
