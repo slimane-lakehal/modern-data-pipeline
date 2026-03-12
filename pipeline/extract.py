@@ -159,3 +159,10 @@ def fetch_languages(repos: list[dict]) -> Generator[dict, None, None]:
             }
 
         time.sleep(0.5)  # stay under rate limit
+
+if __name__ == "__main__":
+    repos = fetch_trending_repos(['python'])
+    breakdown=list(fetch_languages(repos))
+    
+    for repo in breakdown[:5]:
+        print(repo)

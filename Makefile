@@ -20,7 +20,7 @@ help:
 setup:
 	@echo "Setting up the environment..."
 	uv sync
-	uv run deps --project-dir transform/dbt_pipeline --profiles-dir transform/dbt_pipeline
+	uv run dbt deps --project-dir transform/dbt_pipeline --profiles-dir transform/dbt_pipeline
 	@echo ""
 	@echo "Python setup complete"
 	@echo ""

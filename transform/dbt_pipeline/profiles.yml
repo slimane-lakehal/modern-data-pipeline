@@ -1,4 +1,4 @@
-dbt_pipeline:
+modern_data_pipeline:
   target: dev
   outputs:
     dev:
