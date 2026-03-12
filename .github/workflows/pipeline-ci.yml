@@ -70,7 +70,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           GITHUB_TOPICS: "data-engineering,dbt,python,analytics"
           REPOS_PER_TOPIC: "30"
-          DUCKDB_PATH: "./pipeline.duckdb"
+          DUCKDB_PATH: "${{ github.workspace }}/pipeline.duckdb"
 
       - name: dbt build
         run: |
@@ -78,7 +78,7 @@ jobs:
             --project-dir transform/dbt_pipeline \
             --profiles-dir transform/dbt_pipeline
         env:
-          DUCKDB_PATH: "./pipeline.duckdb"
+          DUCKDB_PATH: "${{ github.workspace }}/pipeline.duckdb"
 
       - name: Upload DuckDB as artifact
         uses: actions/upload-artifact@v4

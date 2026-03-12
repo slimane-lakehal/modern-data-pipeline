@@ -42,7 +42,7 @@ extract:
 
 transform:
 	@echo "Running dbt build..."
-	uv run dbt build \
+	DUCKDB_PATH=$(PWD)/pipeline.duckdb uv run dbt build \
 		--project-dir transform/dbt_pipeline \
 		--profiles-dir transform/dbt_pipeline
 
