@@ -1,3 +1,6 @@
+deployment:
+  basePath: /modern-data-pipeline
+
 appearance:
   default: system
   switcher: true
