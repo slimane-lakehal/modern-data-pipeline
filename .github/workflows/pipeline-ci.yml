@@ -9,6 +9,11 @@ on:
   schedule:
     - cron: '0 8 * * *'
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   pipeline:
     runs-on: ubuntu-latest
@@ -16,48 +21,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install uv with all available options
+      - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
-          # The version of Python to set UV_PYTHON to
           python-version: "3.12"
-
-          # Use uv venv to activate a venv ready to be used by later steps
-          activate-environment: "false"
-
-          # Custom path for the virtual environment when using activate-environment (default: .venv in the working directory)
-          venv-path: ""
-
-          # The directory to execute all commands in and look for files such as pyproject.toml
-          working-directory: "."
-
-          # Enable uploading of the uv cache: true, false, or auto (enabled on GitHub-hosted runners, disabled on self-hosted runners)
           enable-cache: "auto"
-
-          # Glob pattern to match files relative to the repository root to control the cache
           cache-dependency-glob: |
             **/pyproject.toml
             **/uv.lock
 
-          # Whether to restore the cache if found
-          restore-cache: "true"
-
-          # Whether to save the cache after the run
-          save-cache: "true"
-
-          # Prune cache before saving
-          prune-cache: "true"
-
-          # Upload managed Python installations to the GitHub Actions cache
-          cache-python: "false"
-
-          # Ignore when nothing is found to cache
-          ignore-nothing-to-cache: "false"
-
-          # Ignore when the working directory is empty
-          ignore-empty-workdir: "false"
-
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           uv sync
           uv run dbt deps \
@@ -68,7 +41,7 @@ jobs:
         run: uv run python scripts/run_extract.py
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          GITHUB_TOPICS: "data-engineering,dbt,python,analytics"
+          GITHUB_TOPICS: "data-engineering,dbt,duckdb,analytics,sql,airflow,spark,kafka,llm,mlops,streamlit,metabase"
           REPOS_PER_TOPIC: "30"
           DUCKDB_PATH: "${{ github.workspace }}/pipeline.duckdb"
 
@@ -80,9 +53,40 @@ jobs:
         env:
           DUCKDB_PATH: "${{ github.workspace }}/pipeline.duckdb"
 
-      - name: Upload DuckDB as artifact
-        uses: actions/upload-artifact@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          name: pipeline-duckdb
-          path: pipeline.duckdb
-          retention-days: 3
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Install dashboard dependencies
+        run: npm ci
+        working-directory: dashboard
+
+      - name: Evidence sources
+        run: npm run sources
+        working-directory: dashboard
+
+      - name: Evidence build
+        run: npm run build
+        working-directory: dashboard
+
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dashboard/build
+
+  deploy:
+    needs: pipeline
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
