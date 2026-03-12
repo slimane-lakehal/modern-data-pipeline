@@ -18,41 +18,38 @@ help:
 # ── Setup ──────────────────────────────────────────────────────────────────────
 
 setup:
-	@echo "📦 Creating virtual environment..."
-	python -m venv .venv
-	.venv/bin/pip install --upgrade pip --quiet
-	.venv/bin/pip install -r requirements.txt
-	.venv/bin/dbt deps --project-dir transform/dbt_pipeline --profiles-dir transform/dbt_pipeline
+	@echo "Setting up the environment..."
+	uv sync
+	uv run deps --project-dir transform/dbt_pipeline --profiles-dir transform/dbt_pipeline
 	@echo ""
-	@echo "✅ Python setup complete"
+	@echo "Python setup complete"
 	@echo ""
-	@echo "📦 Installing Evidence.dev dashboard..."
+	@echo "Installing Evidence.dev dashboard..."
 	cd dashboard && npm install
 	@echo ""
-	@echo "✅ All dependencies installed!"
-	@echo "👉 Activate venv: source .venv/bin/activate"
-	@echo "👉 Copy env file: cp .env.example .env  (then fill GITHUB_TOKEN)"
+	@echo "All dependencies installed!"
+	@echo "Copy env file: cp .env.example .env  (then fill GITHUB_TOKEN)"
 
 # ── Pipeline ───────────────────────────────────────────────────────────────────
 
 run:
-	@echo "🚀 Running full pipeline..."
-	.venv/bin/python -m pipeline.flows
+	@echo "Running full pipeline..."
+	uv run python -m pipeline.flows
 
 extract:
-	@echo "📥 Extract + Load only..."
-	.venv/bin/python scripts/run_extract.py
+	@echo "Extract + Load only..."
+	uv run python -m scripts.run_extract
 
 transform:
-	@echo "🔨 Running dbt build..."
-	.venv/bin/dbt build \
+	@echo "Running dbt build..."
+	uv run dbt build \
 		--project-dir transform/dbt_pipeline \
 		--profiles-dir transform/dbt_pipeline
 
 # ── Dashboard ──────────────────────────────────────────────────────────────────
 
 dashboard:
-	@echo "📊 Starting Evidence.dev dashboard..."
+	@echo "Starting Evidence.dev dashboard..."
 	cd dashboard && npm run dev
 
 dashboard-build:
@@ -61,12 +58,12 @@ dashboard-build:
 # ── Tests ──────────────────────────────────────────────────────────────────────
 
 test:
-	.venv/bin/pytest tests/ -v
+	uv run pytest tests/ -v
 
 # ── CI (used by GitHub Actions) ────────────────────────────────────────────────
 
 ci: extract transform
-	@echo "✅ CI pipeline complete"
+	@echo "CI pipeline complete"
 
 # ── Cleanup ────────────────────────────────────────────────────────────────────
 
@@ -77,4 +74,4 @@ clean:
 	rm -rf transform/dbt_pipeline/dbt_packages
 	rm -rf dashboard/node_modules
 	rm -rf dashboard/.evidence
-	@echo "🧹 Clean complete"
+	@echo "Clean complete"

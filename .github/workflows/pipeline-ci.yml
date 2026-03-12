@@ -19,27 +19,26 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
+          cache: 'uv'
 
       - name: Install dependencies
         run: |
-          python -m venv .venv
-          .venv/bin/pip install -r requirements.txt
-          .venv/bin/dbt deps \
+          uv sync
+          uv run dbt deps \
             --project-dir transform/dbt_pipeline \
             --profiles-dir transform/dbt_pipeline
 
       - name: Extract + Load
-        run: .venv/bin/python scripts/run_extract.py
+        run: uv run python scripts/run_extract.py
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           GITHUB_TOPICS: "data-engineering,dbt,python,analytics"
           REPOS_PER_TOPIC: "30"
           DUCKDB_PATH: "./pipeline.duckdb"
 
       - name: dbt build
         run: |
-          .venv/bin/dbt build \
+          uv run dbt build \
             --project-dir transform/dbt_pipeline \
             --profiles-dir transform/dbt_pipeline
         env:
