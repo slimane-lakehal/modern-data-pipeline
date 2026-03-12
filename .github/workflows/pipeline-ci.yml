@@ -16,9 +16,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Install uv with all available options
+        uses: astral-sh/setup-uv@v7
         with:
-          python-version: '3.12'
+          # The version of Python to set UV_PYTHON to
+          python-version: "3.12"
+
+          # Use uv venv to activate a venv ready to be used by later steps
+          activate-environment: "false"
+
+          # Custom path for the virtual environment when using activate-environment (default: .venv in the working directory)
+          venv-path: ""
+
+          # The directory to execute all commands in and look for files such as pyproject.toml
+          working-directory: "."
+
+          # Enable uploading of the uv cache: true, false, or auto (enabled on GitHub-hosted runners, disabled on self-hosted runners)
+          enable-cache: "auto"
+
+          # Glob pattern to match files relative to the repository root to control the cache
+          cache-dependency-glob: |
+            **/pyproject.toml
+            **/uv.lock
+
+          # Whether to restore the cache if found
+          restore-cache: "true"
+
+          # Whether to save the cache after the run
+          save-cache: "true"
+
+          # Prune cache before saving
+          prune-cache: "true"
+
+          # Upload managed Python installations to the GitHub Actions cache
+          cache-python: "false"
+
+          # Ignore when nothing is found to cache
+          ignore-nothing-to-cache: "false"
+
+          # Ignore when the working directory is empty
+          ignore-empty-workdir: "false"
 
       - name: Install dependencies
         run: |
