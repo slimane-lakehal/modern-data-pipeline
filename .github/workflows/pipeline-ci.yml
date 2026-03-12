@@ -76,6 +76,7 @@ jobs:
           key: pipeline-duckdb-latest
 
       - name: Setup Node.js
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || steps.cache-duckdb.outputs.cache-hit == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -83,19 +84,22 @@ jobs:
           cache-dependency-path: dashboard/package-lock.json
 
       - name: Install dashboard dependencies
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || steps.cache-duckdb.outputs.cache-hit == 'true'
         run: npm ci
         working-directory: dashboard
 
       - name: Evidence sources
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || steps.cache-duckdb.outputs.cache-hit == 'true'
         run: npm run sources
         working-directory: dashboard
 
       - name: Evidence build
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || steps.cache-duckdb.outputs.cache-hit == 'true'
         run: npm run build
         working-directory: dashboard
 
       - name: Upload Pages artifact
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || steps.cache-duckdb.outputs.cache-hit == 'true') && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dashboard/build
