@@ -88,7 +88,8 @@ jobs:
 
       - name: Configure Evidence DuckDB path
         run: |
-          echo "filename: ${{ github.workspace }}/pipeline.duckdb" > dashboard/sources/github_trends/connection.options.yaml
+          sed -i 's|filename:.*|filename: ${{ github.workspace }}/pipeline.duckdb|' \
+            dashboard/sources/github_trends/connection.yaml
 
       - name: Evidence sources
         run: npm run sources
