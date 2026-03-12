@@ -64,6 +64,12 @@ jobs:
         run: npm ci
         working-directory: dashboard
 
+      - name: Configure Evidence DuckDB path
+        run: |
+          cat > dashboard/sources/github_trends/connection.options.yaml << EOF
+          filename: ${{ github.workspace }}/pipeline.duckdb
+          EOF
+
       - name: Evidence sources
         run: npm run sources
         working-directory: dashboard
