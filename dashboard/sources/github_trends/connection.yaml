@@ -2,7 +2,7 @@
 type: duckdb
 name: github_trends
 options:
-  filename: ../../../../../pipeline.duckdb
+  filename: ../../../pipeline.duckdb
 # Advanced Options, you probably don't want to change this
 buildOptions:
   batchSize: 1000000
