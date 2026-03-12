@@ -5,9 +5,11 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main]
-  # Daily run at 8am UTC
+  # Weekly refresh every Monday at 8am UTC
   schedule:
-    - cron: '0 8 * * *'
+    - cron: '0 8 * * 1'
+  # Manual trigger (full ETL)
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -21,7 +23,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Restore cached DuckDB (used on push when ETL is skipped)
+      - name: Restore DuckDB cache
+        id: cache-duckdb
+        uses: actions/cache@v4
+        with:
+          path: pipeline.duckdb
+          key: pipeline-duckdb-latest
+
       - name: Install uv
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         uses: astral-sh/setup-uv@v7
         with:
           python-version: "3.12"
@@ -31,6 +42,7 @@ jobs:
             **/uv.lock
 
       - name: Install Python dependencies
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: |
           uv sync
           uv run dbt deps \
@@ -38,6 +50,7 @@ jobs:
             --profiles-dir transform/dbt_pipeline
 
       - name: Extract + Load
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: uv run python scripts/run_extract.py
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -46,12 +59,21 @@ jobs:
           DUCKDB_PATH: "${{ github.workspace }}/pipeline.duckdb"
 
       - name: dbt build
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: |
           uv run dbt build \
             --project-dir transform/dbt_pipeline \
             --profiles-dir transform/dbt_pipeline
         env:
           DUCKDB_PATH: "${{ github.workspace }}/pipeline.duckdb"
+
+      # Save the freshly built DuckDB for future push runs
+      - name: Save DuckDB cache
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        uses: actions/cache/save@v4
+        with:
+          path: pipeline.duckdb
+          key: pipeline-duckdb-latest
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -66,9 +88,7 @@ jobs:
 
       - name: Configure Evidence DuckDB path
         run: |
-          cat > dashboard/sources/github_trends/connection.options.yaml << EOF
-          filename: ${{ github.workspace }}/pipeline.duckdb
-          EOF
+          echo "filename: ${{ github.workspace }}/pipeline.duckdb" > dashboard/sources/github_trends/connection.options.yaml
 
       - name: Evidence sources
         run: npm run sources
